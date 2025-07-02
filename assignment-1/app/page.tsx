@@ -1,8 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const allQuotes = [
   { topic: "success", quote: "Success is not final, failure is not fatal: It is the courage to continue that counts." },
@@ -16,32 +22,53 @@ const allQuotes = [
   { topic: "focus", quote: "Starve your distractions, feed your focus." }
 ];
 
+const topics = ["success", "motivation", "focus"];
+
 export default function Home() {
   const [topic, setTopic] = useState("");
   const [quotes, setQuotes] = useState<string[]>([]);
 
   const handleGenerate = () => {
     const filtered = allQuotes
-      .filter((q) => q.topic.toLowerCase() === topic.toLowerCase())
-      .slice(0, 3)
-      .map((q) => q.quote);
-    setQuotes(filtered.length ? filtered : ["No quotes found for this topic."]);
+      .filter((q) => topic && q.topic === topic)
+      .map((q) => q.quote)
+      .slice(0, 3);
+    setQuotes(filtered);
+  };
+
+  const handleSurprise = () => {
+    const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+    setTopic(randomTopic);
+    const filtered = allQuotes
+      .filter((q) => q.topic === randomTopic)
+      .map((q) => q.quote)
+      .slice(0, 3);
+    setQuotes(filtered);
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-6 p-4">
-      <h1 className="text-2xl font-bold">Motivational Quote Generator</h1>
-      <div className="flex gap-2 w-full max-w-md">
-        <Input
-          placeholder="Enter a topic (e.g. success, motivation, focus)"
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-        />
+    <main className="flex min-h-screen flex-col items-center justify-center p-4">
+      <h1 className="text-2xl font-bold mb-6">Motivational Quote Generator</h1>
+      <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+        <Select
+          onValueChange={(value) => setTopic(value === "none" ? "" : value)}
+        >
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Select topic" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">None</SelectItem>
+            <SelectItem value="success">Success</SelectItem>
+            <SelectItem value="motivation">Motivation</SelectItem>
+            <SelectItem value="focus">Focus</SelectItem>
+          </SelectContent>
+        </Select>
         <Button onClick={handleGenerate}>Generate</Button>
+        <Button onClick={handleSurprise} variant="outline">Surprise Me</Button>
       </div>
-      <div className="mt-4 space-y-3 max-w-xl text-center">
-        {quotes.map((q, idx) => (
-          <p key={idx} className="text-muted-foreground">{q}</p>
+      <div className="text-center space-y-2">
+        {quotes.map((quote, idx) => (
+          <p key={idx} className="text-gray-700">{quote}</p>
         ))}
       </div>
     </main>
